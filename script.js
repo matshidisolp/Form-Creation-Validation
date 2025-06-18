@@ -1,79 +1,48 @@
-// Ensure DOM is loaded before script runs
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", function () {
+    // Step 1: Select form and feedback div
+    const form = document.getElementById("registration-form");
+    const feedbackDiv = document.getElementById("form-feedback");
 
-    // Select DOM elements
-    const addButton = document.getElementById('add-task-btn');
-    const taskInput = document.getElementById('task-input');
-    const taskList = document.getElementById('task-list');
+    // Step 2: Handle form submission
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent actual form submission
 
-    // Load tasks from Local Storage
-    function loadTasks() {
-        const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-        storedTasks.forEach(taskText => {
-            addTask(taskText, false); // false to avoid re-saving
-        });
-    }
+        // Step 3: Get and trim input values
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-    // Add a new task
-    function addTask(taskText, save = true) {
-        // Read from input if taskText not provided (user-initiated)
-        if (typeof taskText !== 'string') {
-            taskText = taskInput.value.trim();
+        // Step 4: Validation logic
+        let isValid = true;
+        const messages = [];
+
+        // Username validation
+        if (username.length < 3) {
+            isValid = false;
+            messages.push("Username must be at least 3 characters long.");
         }
 
-        // Alert if task is empty (for user input)
-        if (taskText === "") {
-            if (save) {
-                alert("Please enter a task.");
-            }
-            return;
+        // Email validation
+        if (!email.includes("@") || !email.includes(".")) {
+            isValid = false;
+            messages.push("Please enter a valid email address.");
         }
 
-        // Create list item and set text
-        const listItem = document.createElement('li');
-        listItem.textContent = taskText;
-
-        // Create remove button
-        const removeButton = document.createElement('button');
-        removeButton.textContent = "Remove";
-        removeButton.className = 'remove-btn';
-
-        // Set remove button click action
-        removeButton.onclick = function() {
-            taskList.removeChild(listItem); // Remove from DOM
-
-            // Update Local Storage
-            let currentTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            currentTasks = currentTasks.filter(task => task !== taskText);
-            localStorage.setItem('tasks', JSON.stringify(currentTasks));
-        };
-
-        // Append button to list item, then list item to task list
-        listItem.appendChild(removeButton);
-        taskList.appendChild(listItem);
-
-        // Save to Local Storage if new task
-        if (save) {
-            const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-            storedTasks.push(taskText);
-            localStorage.setItem('tasks', JSON.stringify(storedTasks));
-            taskInput.value = ""; // Clear input field
+        // Password validation
+        if (password.length < 8) {
+            isValid = false;
+            messages.push("Password must be at least 8 characters long.");
         }
-    }
 
-    // Add task on button click
-    addButton.addEventListener('click', () => addTask());
+        // Step 5: Display feedback
+        feedbackDiv.style.display = "block";
 
-    // Add task on 'Enter' key press in input field
-    taskInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            addTask();
+        if (isValid) {
+            feedbackDiv.textContent = "Registration successful!";
+            feedbackDiv.style.color = "#28a745"; // Green
+        } else {
+            feedbackDiv.innerHTML = messages.join("<br>");
+            feedbackDiv.style.color = "#dc3545"; // Red
         }
     });
-
-    // Load tasks when page loads
-    loadTasks();
-    // Invoke addTask on DOMContentLoaded (as per previous specific checker requirement)
-    // This might cause an initial alert if taskInput is empty.
-    addTask();
 });
